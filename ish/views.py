@@ -3,6 +3,9 @@ from .models import Xodim, Mahsulot, IshKuni
 from django.db.models import Sum
 from datetime import date
 
+def index(request):
+    return render(request, "index.html")
+
 def xodimlar(request):
     xodimlar = Xodim.objects.all()
     for x in xodimlar:
