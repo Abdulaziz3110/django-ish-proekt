@@ -3,6 +3,9 @@ from .models import Xodim, Mahsulot, IshKuni
 from django.db.models import Sum
 from datetime import date
 
+def home(request):
+    return render(request, 'index.html')
+
 def index(request):
     return render(request, "index.html")
 
