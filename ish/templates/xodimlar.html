@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-center mb-4">Xodimlar ro‘yxati</h1>
+
+<div class="row">
+  {% for x in xodimlar %}
+  <div class="col-md-4 col-sm-6 mb-4">
+    <div class="card shadow-sm border-0 rounded-3 h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ x.ism }} {{ x.familiya }}</h5>
+        <p class="card-text mb-1"><b>Bo‘lim:</b> {{ x.bolim }}</p>
+        <p class="card-text mb-1"><b>Lavozim:</b> {{ x.lavozim }}</p>
+        <p class="card-text"><b>Telefon:</b> {{ x.telefon }}</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-center">Xodimlar mavjud emas.</p>
+  {% endfor %}
+</div>
+{% endblock %}

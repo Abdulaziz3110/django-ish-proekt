@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ish kunlari</h1>
+<div class="row">
+  {% for i in ish_kunlari %}
+  <div class="col-md-4 col-sm-6">
+    <div class="card shadow-sm p-3">
+      <h5>{{ i.xodim.ism }} {{ i.xodim.familiya }}</h5>
+      <p><b>Sana:</b> {{ i.sana }}</p>
+      <p><b>Mahsulot:</b> {{ i.mahsulot.nomi }} ({{ i.mahsulot.model }})</p>
+      <p><b>Tikilgan soni:</b> {{ i.soni }}</p>
+    </div>
+  </div>
+  {% empty %}
+  <p>Ish kuni ma’lumotlari yo‘q.</p>
+  {% endfor %}
+</div>
+{% endblock %}

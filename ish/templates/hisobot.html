@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Hisobot</h1>
+
+<form method="get" class="card">
+  <label>Boshlanish sana:</label>
+  <input type="date" name="boshlanish" value="{{ boshlanish }}">
+  <label>Tugash sana:</label>
+  <input type="date" name="tugash" value="{{ tugash }}">
+  <button type="submit">Filtrlash</button>
+</form>
+
+{% if natija %}
+  {% for xodim, summa in natija.items %}
+  <div class="card">
+    <b>{{ xodim.ism }} {{ xodim.familiya }}</b><br>
+    Jami ishlab topgan: <b>{{ summa }} so‘m</b>
+  </div>
+  {% endfor %}
+  <div class="card" style="background-color: #e0f7fa;">
+    <b>Umumiy summa: {{ jami_summa }} so‘m</b>
+  </div>
+{% else %}
+  <p>Hozircha hisobot uchun ma’lumot yo‘q.</p>
+{% endif %}
+{% endblock %}

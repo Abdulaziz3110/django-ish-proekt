@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h1>🧑‍💼 Admin Panel</h1>
+
+  <div class="grid">
+    <div class="card">
+      <h2>{{ xodimlar_soni }}</h2>
+      <p>Xodimlar soni</p>
+    </div>
+    <div class="card">
+      <h2>{{ mahsulotlar_soni }}</h2>
+      <p>Mahsulotlar soni</p>
+    </div>
+    <div class="card">
+      <h2>{{ ishlar_soni }}</h2>
+      <p>Ish kunlari yozuvlari</p>
+    </div>
+    <div class="card">
+      <h2>{{ jami_tikilgan }}</h2>
+      <p>Jami tikilgan mahsulotlar</p>
+    </div>
+  </div>
+
+  <div class="links">
+    <a href="{% url 'xodimlar' %}">👷‍♂️ Xodimlarni boshqarish</a><br>
+    <a href="{% url 'mahsulotlar' %}">📦 Mahsulotlarni boshqarish</a><br>
+    <a href="{% url 'ish_kunlari' %}">🕓 Ish kunlarini boshqarish</a><br>
+    <a href="/admin/">⚙️ Django Admin panelga o‘tish</a>
+  </div>
+</div>
+
+<style>
+.container {
+  padding: 20px;
+  text-align: center;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.card h2 {
+  font-size: 2rem;
+  color: #007bff;
+}
+.links a {
+  display: block;
+  margin: 8px 0;
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+}
+.links a:hover {
+  text-decoration: underline;
+}
+</style>
+{% endblock %}

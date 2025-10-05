@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-center mb-4">Mahsulotlar ro‘yxati</h1>
+
+<div class="row">
+  {% for m in mahsulotlar %}
+  <div class="col-md-4 col-sm-6 mb-4">
+    <div class="card shadow-sm border-0 rounded-3 h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ m.nomi }}</h5>
+        <p class="card-text mb-1"><b>Model:</b> {{ m.model }}</p>
+        <p class="card-text mb-1"><b>Material:</b> {{ m.material }}</p>
+        <p class="card-text"><b>Narxi:</b> {{ m.narx }} so‘m</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-center">Hozircha mahsulotlar yo‘q.</p>
+  {% endfor %}
+</div>
+{% endblock %}
