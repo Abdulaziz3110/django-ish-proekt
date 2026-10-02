@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="fw-bold mb-1"><i class="fa-solid fa-right-to-bracket me-2"></i>Tizimga Kirish</h3>
+                <p class="text-white-50 mb-0">Xodimlar kabinetiga kirish</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>{{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Username (Login)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
+                            <input type="text" name="username" class="form-control rounded-end-3" placeholder="Username kiriting" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark">Parol</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" name="password" class="form-control rounded-end-3" placeholder="Parol kiriting" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-semibold shadow-sm fs-5">
+                        <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Kirish
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <span class="text-muted">Hisobingiz yo'qmi?</span>
+                <a href="{% url 'register' %}" class="fw-bold text-primary ms-1 text-decoration-none">Ro'yxatdan o'tish</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,9 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Xodimlar jadvali
 class Xodim(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='xodim_profile')
     ism = models.CharField(max_length=100)
     familiya = models.CharField(max_length=100)
+
     bolim = models.CharField(max_length=100, blank=True, null=True)
     lavozim = models.CharField(max_length=100, blank=True, null=True)
     telefon = models.CharField(max_length=20, blank=True, null=True)

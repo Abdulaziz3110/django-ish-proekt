@@ -2,12 +2,74 @@ from django.shortcuts import render, redirect
 from .models import Xodim, Mahsulot, IshKuni
 from django.db.models import Sum
 from datetime import date
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import user_passes_test, login_required
 
 def home(request):
     return render(request, 'index.html')
 
 def index(request):
     return render(request, "index.html")
+
+def register_view(request):
+    if request.method == "POST":
+        ism = request.POST.get("ism")
+        familiya = request.POST.get("familiya")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        bolim = request.POST.get("bolim")
+        lavozim = request.POST.get("lavozim")
+        telefon = request.POST.get("telefon")
+
+        if User.objects.filter(username=username).exists():
+            return render(request, "register.html", {"error": "Ushbu username band! Boshqa username tanlang."})
+
+        # Foydalanuvchi yaratish
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=ism,
+            last_name=familiya
+        )
+
+        # Xodim profilini yaratish va bazaga saqlash
+        Xodim.objects.create(
+            user=user,
+            ism=ism,
+            familiya=familiya,
+            bolim=bolim,
+            lavozim=lavozim,
+            telefon=telefon,
+            ishga_kirilgan_sana=date.today()
+        )
+
+        # Avtomatik login qilish
+        login(request, user)
+        return redirect("index")
+
+    return render(request, "register.html")
+
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            return render(request, "login.html", {"error": "Username yoki parol noto'g'ri!"})
+
+    return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("index")
+
 
 def xodimlar(request):
     if request.method == "POST":
@@ -73,8 +135,6 @@ def hisobot(request):
         "tugash": tugash
     })
 
-from django.contrib.auth.decorators import user_passes_test
-
 def is_admin(user):
     return user.is_superuser
 
@@ -91,3 +151,4 @@ def admin_dashboard(request):
         'ishlar_soni': ishlar_soni,
         'jami_tikilgan': jami_tikilgan,
     })
+
