@@ -10,6 +10,10 @@ class Xodim(models.Model):
     ish_haqi = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ishga_kirilgan_sana = models.DateField(blank=True, null=True)
 
+    class Meta:
+        verbose_name = "Xodim"
+        verbose_name_plural = "Xodimlar"
+
     def umumiy_maosh(self):
         # Xodimning ish kunlari orqali umumiy maoshni hisoblash
         ishlar = IshKuni.objects.filter(xodim=self)
@@ -26,6 +30,10 @@ class Mahsulot(models.Model):
     model = models.CharField(max_length=100)
     narxi = models.DecimalField(max_digits=10, decimal_places=2)
 
+    class Meta:
+        verbose_name = "Mahsulot"
+        verbose_name_plural = "Mahsulotlar"
+
     def __str__(self):
         return f"{self.nomi} ({self.model})"
 
@@ -37,5 +45,10 @@ class IshKuni(models.Model):
     sana = models.DateField()
     soni = models.IntegerField(default=0)  # nechta mahsulot tikdi
 
+    class Meta:
+        verbose_name = "Ish kuni"
+        verbose_name_plural = "Ish kunlari"
+
     def __str__(self):
         return f"{self.xodim} - {self.mahsulot} - {self.sana}"
+
