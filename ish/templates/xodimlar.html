@@ -1,21 +1,121 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-center mb-4">Xodimlar ro‘yxati</h1>
-
-<div class="row">
-  {% for x in xodimlar %}
-  <div class="col-md-4 col-sm-6 mb-4">
-    <div class="card shadow-sm border-0 rounded-3 h-100">
-      <div class="card-body">
-        <h5 class="card-title">{{ x.ism }} {{ x.familiya }}</h5>
-        <p class="card-text mb-1"><b>Bo‘lim:</b> {{ x.bolim }}</p>
-        <p class="card-text mb-1"><b>Lavozim:</b> {{ x.lavozim }}</p>
-        <p class="card-text"><b>Telefon:</b> {{ x.telefon }}</p>
-      </div>
+<div class="container py-4">
+    <!-- Title & Add Button -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">
+                <i class="fa-solid fa-users text-primary me-2"></i>Xodimlar Ro'yxati
+            </h2>
+            <p class="text-muted mb-0">Korxonada faoliyat olib borayotgan xodimlarni boshqarish</p>
+        </div>
+        <button type="button" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addXodimModal">
+            <i class="fa-solid fa-user-plus me-2"></i>Yangi xodim qo'shish
+        </button>
     </div>
-  </div>
-  {% empty %}
-  <p class="text-center">Xodimlar mavjud emas.</p>
-  {% endfor %}
+
+    <!-- Xodimlar Grid -->
+    <div class="row g-4">
+        {% for x in xodimlar %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-user fa-lg"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">{{ x.ism }} {{ x.familiya }}</h5>
+                            {% if x.lavozim %}
+                            <span class="badge bg-light text-primary border border-primary-subtle fw-medium">{{ x.lavozim }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr class="text-muted opacity-25 my-3">
+                    <div class="space-y-2">
+                        {% if x.bolim %}
+                        <p class="card-text mb-2 text-muted fs-6">
+                            <i class="fa-solid fa-sitemap me-2 text-secondary"></i><b>Bo'lim:</b> {{ x.bolim }}
+                        </p>
+                        {% endif %}
+                        {% if x.telefon %}
+                        <p class="card-text mb-2 text-muted fs-6">
+                            <i class="fa-solid fa-phone me-2 text-secondary"></i><b>Tel:</b> {{ x.telefon }}
+                        </p>
+                        {% endif %}
+                        {% if x.maosh %}
+                        <p class="card-text mb-0 text-dark fw-semibold fs-6">
+                            <i class="fa-solid fa-wallet me-2 text-success"></i><b>Jami ishlangan:</b> {{ x.maosh }} so'm
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                <i class="fa-solid fa-user-slash text-muted fa-3x mb-3"></i>
+                <h4 class="fw-semibold text-muted">Xodimlar mavjud emas</h4>
+                <p class="text-muted">Yuqoridagi tugma orqali yangi xodim qo'shishingiz mumkin.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Yangi Xodim Qo'shish Modali -->
+<div class="modal fade" id="addXodimModal" tabindex="-1" aria-labelledby="addXodimModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white py-3" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                <h5 class="modal-title mb-0 fw-bold" id="addXodimModalLabel">
+                    <i class="fa-solid fa-user-plus me-2"></i>Yangi xodim qo'shish
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'xodimlar' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Ism <span class="text-danger">*</span></label>
+                            <input type="text" name="ism" class="form-control rounded-3" placeholder="Masalan: Ali" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Familiya <span class="text-danger">*</span></label>
+                            <input type="text" name="familiya" class="form-control rounded-3" placeholder="Masalan: Valiyev" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Bo'lim</label>
+                            <input type="text" name="bolim" class="form-control rounded-3" placeholder="Masalan: Tikuvchilik">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Lavozim</label>
+                            <input type="text" name="lavozim" class="form-control rounded-3" placeholder="Masalan: Usta">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Telefon</label>
+                            <input type="text" name="telefon" class="form-control rounded-3" placeholder="+998 90 123 45 67">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark">Ish haqi (baza)</label>
+                            <input type="number" step="0.01" name="ish_haqi" class="form-control rounded-3" placeholder="0.00">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-dark">Ishga kirilgan sana</label>
+                            <input type="date" name="ishga_kirilgan_sana" class="form-control rounded-3">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                        <i class="fa-solid fa-check me-1"></i> Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

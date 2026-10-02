@@ -1,65 +1,110 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-  <h1>🧑‍💼 Admin Panel</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fa-solid fa-chart-pie me-2 text-primary"></i> Boshqaruv Paneli (Admin)</h2>
+    </div>
 
-  <div class="grid">
-    <div class="card">
-      <h2>{{ xodimlar_soni }}</h2>
-      <p>Xodimlar soni</p>
-    </div>
-    <div class="card">
-      <h2>{{ mahsulotlar_soni }}</h2>
-      <p>Mahsulotlar soni</p>
-    </div>
-    <div class="card">
-      <h2>{{ ishlar_soni }}</h2>
-      <p>Ish kunlari yozuvlari</p>
-    </div>
-    <div class="card">
-      <h2>{{ jami_tikilgan }}</h2>
-      <p>Jami tikilgan mahsulotlar</p>
-    </div>
-  </div>
+    <!-- Statistikalar -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 py-3" style="border-left: 5px solid #4361ee !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                <i class="fa-solid fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Xodimlar soni</p>
+                            <h3 class="fw-bold mb-0">{{ xodimlar_soni }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 py-3" style="border-left: 5px solid #2ec4b6 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success" style="color: #2ec4b6 !important;">
+                                <i class="fa-solid fa-box-open fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Mahsulotlar</p>
+                            <h3 class="fw-bold mb-0">{{ mahsulotlar_soni }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <div class="links">
-    <a href="{% url 'xodimlar' %}">👷‍♂️ Xodimlarni boshqarish</a><br>
-    <a href="{% url 'mahsulotlar' %}">📦 Mahsulotlarni boshqarish</a><br>
-    <a href="{% url 'ish_kunlari' %}">🕓 Ish kunlarini boshqarish</a><br>
-    <a href="/admin/">⚙️ Django Admin panelga o‘tish</a>
-  </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 py-3" style="border-left: 5px solid #f5b700 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                                <i class="fa-regular fa-calendar-check fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Ish kunlari</p>
+                            <h3 class="fw-bold mb-0">{{ ishlar_soni }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 py-3" style="border-left: 5px solid #e71d36 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
+                                <i class="fa-solid fa-shirt fa-2x"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Jami tikilgan</p>
+                            <h3 class="fw-bold mb-0">{{ jami_tikilgan }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tezkor havolalar -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-link me-2 text-primary"></i> Tezkor harakatlar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'xodimlar' %}" class="btn btn-outline-primary px-4 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-users me-2"></i> Xodimlarni boshqarish
+                        </a>
+                        <a href="{% url 'mahsulotlar' %}" class="btn btn-outline-success px-4 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-box me-2"></i> Mahsulotlarni boshqarish
+                        </a>
+                        <a href="{% url 'ish_kunlari' %}" class="btn btn-outline-warning px-4 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-calendar-alt me-2"></i> Ish kunlarini boshqarish
+                        </a>
+                        <a href="/admin/" class="btn btn-outline-dark px-4 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-gear me-2"></i> Django Admin panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<style>
-.container {
-  padding: 20px;
-  text-align: center;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin: 20px 0;
-}
-.card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.card h2 {
-  font-size: 2rem;
-  color: #007bff;
-}
-.links a {
-  display: block;
-  margin: 8px 0;
-  color: #007bff;
-  font-weight: bold;
-  text-decoration: none;
-}
-.links a:hover {
-  text-decoration: underline;
-}
-</style>
 {% endblock %}

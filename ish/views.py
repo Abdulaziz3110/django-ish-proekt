@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Xodim, Mahsulot, IshKuni
 from django.db.models import Sum
 from datetime import date
@@ -10,7 +10,28 @@ def index(request):
     return render(request, "index.html")
 
 def xodimlar(request):
-    xodimlar = Xodim.objects.all()
+    if request.method == "POST":
+        ism = request.POST.get("ism")
+        familiya = request.POST.get("familiya")
+        bolim = request.POST.get("bolim")
+        lavozim = request.POST.get("lavozim")
+        telefon = request.POST.get("telefon")
+        ish_haqi = request.POST.get("ish_haqi") or 0
+        ishga_kirilgan_sana = request.POST.get("ishga_kirilgan_sana") or None
+
+        if ism and familiya:
+            Xodim.objects.create(
+                ism=ism,
+                familiya=familiya,
+                bolim=bolim,
+                lavozim=lavozim,
+                telefon=telefon,
+                ish_haqi=ish_haqi,
+                ishga_kirilgan_sana=ishga_kirilgan_sana if ishga_kirilgan_sana else None
+            )
+            return redirect("xodimlar")
+
+    xodimlar = Xodim.objects.all().order_by('-id')
     for x in xodimlar:
         x.maosh = x.umumiy_maosh()
     return render(request, "xodimlar.html", {"xodimlar": xodimlar})
