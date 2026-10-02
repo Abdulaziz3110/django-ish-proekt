@@ -176,10 +176,15 @@
                     {% endif %}
 
                     {% if user.is_authenticated %}
+                    {% if user.xodim_profile %}
+                    <li class="nav-item">
+                        <a class="nav-link text-info fw-semibold" href="{% url 'kabinet' %}"><i class="fa-solid fa-id-card me-1"></i> Kabinetim</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                        <span class="nav-link active fw-semibold text-white bg-white bg-opacity-20 px-3 py-1 rounded-pill d-inline-block">
+                        <a class="nav-link active fw-semibold text-white bg-white bg-opacity-20 px-3 py-1 rounded-pill d-inline-block" href="{% url 'kabinet' %}">
                             <i class="fa-solid fa-circle-user me-1"></i> {{ user.first_name|default:user.username }}
-                        </span>
+                        </a>
                     </li>
                     <li class="nav-item ms-lg-1">
                         <a class="nav-link text-white-50" href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket me-1"></i> Chiqish</a>

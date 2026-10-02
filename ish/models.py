@@ -12,6 +12,7 @@ class Xodim(models.Model):
     telefon = models.CharField(max_length=20, blank=True, null=True)
     ish_haqi = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ishga_kirilgan_sana = models.DateField(blank=True, null=True)
+    is_approved = models.BooleanField(default=False, verbose_name="Admin tomonidan tasdiqlangan")
 
     class Meta:
         verbose_name = "Xodim"

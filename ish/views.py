@@ -1,18 +1,26 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Xodim, Mahsulot, IshKuni
 from django.db.models import Sum
 from datetime import date
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib import messages
 
 def home(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('admin_dashboard')
+        elif hasattr(request.user, 'xodim_profile'):
+            return redirect('kabinet')
     return render(request, 'index.html')
 
 def index(request):
     return render(request, "index.html")
 
 def register_view(request):
+    existing_xodimlar = Xodim.objects.filter(user__isnull=True)
+
     if request.method == "POST":
         ism = request.POST.get("ism")
         familiya = request.POST.get("familiya")
@@ -21,11 +29,36 @@ def register_view(request):
         bolim = request.POST.get("bolim")
         lavozim = request.POST.get("lavozim")
         telefon = request.POST.get("telefon")
+        selected_xodim_id = request.POST.get("existing_xodim")
 
+        # 1. Username allaqachon mavjudligini tekshirish
         if User.objects.filter(username=username).exists():
-            return render(request, "register.html", {"error": "Ushbu username band! Boshqa username tanlang."})
+            return render(request, "register.html", {
+                "error": "Ushbu username band! Boshqa username tanlang.",
+                "existing_xodimlar": existing_xodimlar
+            })
 
-        # Foydalanuvchi yaratish
+        xodim = None
+        if selected_xodim_id:
+            xodim = Xodim.objects.filter(id=selected_xodim_id).first()
+            if xodim and xodim.user is not None:
+                return render(request, "register.html", {
+                    "error": "Ushbu xodim uchun allaqachon akkaunt yaratilgan!",
+                    "existing_xodimlar": existing_xodimlar
+                })
+
+        # 2. Ism, familiya va telefon orqali takroriy akkauntni tekshirish
+        if not xodim and telefon:
+            matched = Xodim.objects.filter(ism__iexact=ism, familiya__iexact=familiya, telefon=telefon).first()
+            if matched:
+                if matched.user is not None:
+                    return render(request, "register.html", {
+                        "error": f"{ism} {familiya} uchun allaqachon akkaunt yaratilgan!",
+                        "existing_xodimlar": existing_xodimlar
+                    })
+                xodim = matched
+
+        # 3. Foydalanuvchi yaratish (Parol xavfsiz hashlanadi)
         user = User.objects.create_user(
             username=username,
             password=password,
@@ -33,22 +66,36 @@ def register_view(request):
             last_name=familiya
         )
 
-        # Xodim profilini yaratish va bazaga saqlash
-        Xodim.objects.create(
-            user=user,
-            ism=ism,
-            familiya=familiya,
-            bolim=bolim,
-            lavozim=lavozim,
-            telefon=telefon,
-            ishga_kirilgan_sana=date.today()
-        )
+        # 4. Xodim profiliga biriktirish yoki yangi yaratish (is_approved=False)
+        if xodim:
+            xodim.user = user
+            xodim.ism = ism
+            xodim.familiya = familiya
+            if telefon:
+                xodim.telefon = telefon
+            if bolim:
+                xodim.bolim = bolim
+            if lavozim:
+                xodim.lavozim = lavozim
+            xodim.is_approved = False
+            xodim.save()
+        else:
+            Xodim.objects.create(
+                user=user,
+                ism=ism,
+                familiya=familiya,
+                bolim=bolim,
+                lavozim=lavozim,
+                telefon=telefon,
+                ishga_kirilgan_sana=date.today(),
+                is_approved=False
+            )
 
-        # Avtomatik login qilish
-        login(request, user)
-        return redirect("index")
+        return render(request, "register.html", {
+            "success": "Ro'yxatdan muvaffaqiyatli o'tdingiz! Akkauntingiz admin tomonidan tasdiqlangach tizimga kira olasiz."
+        })
 
-    return render(request, "register.html")
+    return render(request, "register.html", {"existing_xodimlar": existing_xodimlar})
 
 
 def login_view(request):
@@ -58,8 +105,22 @@ def login_view(request):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            return redirect("index")
+            if user.is_superuser:
+                login(request, user)
+                return redirect("admin_dashboard")
+
+            # Xodim profilini tekshirish
+            xodim = getattr(user, 'xodim_profile', None)
+            if xodim:
+                if not xodim.is_approved:
+                    return render(request, "login.html", {
+                        "error": "Sizning akkauntingiz hali admin tomonidan tasdiqlanmagan. Iltimos, admin tasdiqlashini kuting."
+                    })
+                login(request, user)
+                return redirect("kabinet")
+            else:
+                login(request, user)
+                return redirect("index")
         else:
             return render(request, "login.html", {"error": "Username yoki parol noto'g'ri!"})
 
@@ -69,6 +130,39 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("index")
+
+
+@login_required
+def kabinet_view(request):
+    user = request.user
+    xodim = getattr(user, 'xodim_profile', None)
+
+    if not xodim and not user.is_superuser:
+        return redirect('index')
+
+    if user.is_superuser and not xodim:
+        # Admin uchun namuna sifatida birinchi xodimni ko'rsatish yoki dashboardga yo'naltirish
+        xodim = Xodim.objects.first()
+
+    boshlanish = request.GET.get('boshlanish')
+    tugash = request.GET.get('tugash')
+
+    ishlar = IshKuni.objects.filter(xodim=xodim).select_related('mahsulot').order_by('-sana')
+
+    if boshlanish and tugash:
+        ishlar = ishlar.filter(sana__range=[boshlanish, tugash])
+
+    jami_soni = sum(i.soni for i in ishlar)
+    jami_maosh = sum(i.mahsulot.narxi * i.soni for i in ishlar)
+
+    return render(request, "kabinet.html", {
+        "xodim": xodim,
+        "ishlar": ishlar,
+        "jami_soni": jami_soni,
+        "jami_maosh": jami_maosh,
+        "boshlanish": boshlanish,
+        "tugash": tugash
+    })
 
 
 def xodimlar(request):
@@ -89,7 +183,8 @@ def xodimlar(request):
                 lavozim=lavozim,
                 telefon=telefon,
                 ish_haqi=ish_haqi,
-                ishga_kirilgan_sana=ishga_kirilgan_sana if ishga_kirilgan_sana else None
+                ishga_kirilgan_sana=ishga_kirilgan_sana if ishga_kirilgan_sana else None,
+                is_approved=True  # Admin qo'shgan xodim avtomatik tasdiqlangan bo'ladi
             )
             return redirect("xodimlar")
 
@@ -113,11 +208,9 @@ def hisobot(request):
 
     ishlar = IshKuni.objects.select_related('xodim', 'mahsulot').all()
 
-    # Agar foydalanuvchi sana tanlasa, filtrlaymiz
     if boshlanish and tugash:
         ishlar = ishlar.filter(sana__range=[boshlanish, tugash])
 
-    # Xodimlar bo‘yicha umumiy summani hisoblash
     natija = {}
     jami_summa = 0
     for i in ishlar:
@@ -144,11 +237,28 @@ def admin_dashboard(request):
     mahsulotlar_soni = Mahsulot.objects.count()
     ishlar_soni = IshKuni.objects.count()
     jami_tikilgan = sum(i.soni for i in IshKuni.objects.all())
+    pending_xodimlar = Xodim.objects.filter(is_approved=False)
 
     return render(request, 'ish/admin_dashboard.html', {
         'xodimlar_soni': xodimlar_soni,
         'mahsulotlar_soni': mahsulotlar_soni,
         'ishlar_soni': ishlar_soni,
         'jami_tikilgan': jami_tikilgan,
+        'pending_xodimlar': pending_xodimlar,
     })
+
+@user_passes_test(is_admin)
+def approve_xodim(request, xodim_id):
+    xodim = get_object_or_404(Xodim, id=xodim_id)
+    xodim.is_approved = True
+    xodim.save()
+    return redirect('admin_dashboard')
+
+@user_passes_test(is_admin)
+def disapprove_xodim(request, xodim_id):
+    xodim = get_object_or_404(Xodim, id=xodim_id)
+    xodim.is_approved = False
+    xodim.save()
+    return redirect('admin_dashboard')
+
 

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <!-- Header / Welcome Banner -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-gradient text-white" style="background: linear-gradient(135deg, #4361ee, #3f37c9);">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-white bg-opacity-20 text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 65px; height: 65px; font-size: 1.8rem;">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1">{{ xodim.ism }} {{ xodim.familiya }}</h2>
+                    <p class="mb-0 text-white-50 fs-6">
+                        {% if xodim.lavozim %}<span class="badge bg-white text-primary me-2">{{ xodim.lavozim }}</span>{% endif %}
+                        {% if xodim.bolim %}<span><i class="fa-solid fa-sitemap me-1"></i>{{ xodim.bolim }}</span>{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light rounded-pill px-4">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i>Chiqish
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 py-3" style="border-left: 5px solid #4361ee !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary me-3">
+                            <i class="fa-solid fa-shirt fa-2x"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold fs-6">Jami Tikilgan Mahsulotlar</p>
+                            <h3 class="fw-bold mb-0 text-dark">{{ jami_soni }} dona</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 py-3" style="border-left: 5px solid #2ec4b6 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success me-3">
+                            <i class="fa-solid fa-wallet fa-2x"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold fs-6">Jami Ishlangan Maosh</p>
+                            <h3 class="fw-bold mb-0 text-success">{{ jami_maosh }} so'm</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sana Filtri va Ishlar Ro'yxati -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="fa-solid fa-list-check text-primary me-2"></i>Sizning Ish Bajarish Tarixingiz
+            </h5>
+
+            <!-- Sana filtri -->
+            <form method="GET" action="{% url 'kabinet' %}" class="d-flex flex-wrap align-items-center gap-2">
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <span class="input-group-text bg-light text-muted">Dan:</span>
+                    <input type="date" name="boshlanish" class="form-control" value="{{ boshlanish|default:'' }}">
+                </div>
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <span class="input-group-text bg-light text-muted">Gacha:</span>
+                    <input type="date" name="tugash" class="form-control" value="{{ tugash|default:'' }}">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-filter me-1"></i>Filtr
+                </button>
+                {% if boshlanish or tugash %}
+                <a href="{% url 'kabinet' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Tozalash</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Sana</th>
+                            <th>Mahsulot Nomi</th>
+                            <th>Model</th>
+                            <th>Dona Narxi</th>
+                            <th>Soni (dona)</th>
+                            <th class="pe-4 text-end">Jami Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in ishlar %}
+                        <tr>
+                            <td class="ps-4 fw-medium text-muted"><i class="fa-regular fa-calendar me-2"></i>{{ i.sana|date:"d.m.Y" }}</td>
+                            <td class="fw-semibold text-dark">{{ i.mahsulot.nomi }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ i.mahsulot.model }}</span></td>
+                            <td>{{ i.mahsulot.narxi }} so'm</td>
+                            <td class="fw-bold text-primary">{{ i.soni }}</td>
+                            <td class="pe-4 text-end fw-bold text-success">
+                                {% widthratio i.mahsulot.narxi 1 i.soni %} so'm
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
+                                <h5>Hali hech qanday ish kiritilmagan</h5>
+                                <p class="mb-0 text-muted">Kiritilgan ish kunlari shu yerda ko'rinadi.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
