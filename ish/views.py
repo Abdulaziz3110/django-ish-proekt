@@ -238,6 +238,7 @@ def admin_dashboard(request):
     ishlar_soni = IshKuni.objects.count()
     jami_tikilgan = sum(i.soni for i in IshKuni.objects.all())
     pending_xodimlar = Xodim.objects.filter(is_approved=False)
+    barcha_xodimlar = Xodim.objects.select_related('user').all().order_by('-id')
 
     return render(request, 'ish/admin_dashboard.html', {
         'xodimlar_soni': xodimlar_soni,
@@ -245,6 +246,7 @@ def admin_dashboard(request):
         'ishlar_soni': ishlar_soni,
         'jami_tikilgan': jami_tikilgan,
         'pending_xodimlar': pending_xodimlar,
+        'barcha_xodimlar': barcha_xodimlar,
     })
 
 @user_passes_test(is_admin)
@@ -252,6 +254,7 @@ def approve_xodim(request, xodim_id):
     xodim = get_object_or_404(Xodim, id=xodim_id)
     xodim.is_approved = True
     xodim.save()
+    messages.success(request, f"{xodim.ism} {xodim.familiya} tasdiqlandi!")
     return redirect('admin_dashboard')
 
 @user_passes_test(is_admin)
@@ -259,6 +262,56 @@ def disapprove_xodim(request, xodim_id):
     xodim = get_object_or_404(Xodim, id=xodim_id)
     xodim.is_approved = False
     xodim.save()
+    messages.warning(request, f"{xodim.ism} {xodim.familiya} tasdiqdan chiqarildi!")
     return redirect('admin_dashboard')
+
+@user_passes_test(is_admin)
+def toggle_xodim_status(request, xodim_id):
+    xodim = get_object_or_404(Xodim, id=xodim_id)
+    if xodim.user:
+        xodim.user.is_active = not xodim.user.is_active
+        xodim.user.save()
+        status_text = "faollashtirildi" if xodim.user.is_active else "bloklandi"
+        messages.info(request, f"{xodim.ism} {xodim.familiya} akkaunti {status_text}!")
+    return redirect('admin_dashboard')
+
+@user_passes_test(is_admin)
+def manage_xodim_account(request, xodim_id):
+    xodim = get_object_or_404(Xodim, id=xodim_id)
+    if request.method == "POST":
+        new_username = request.POST.get("username")
+        new_password = request.POST.get("password")
+
+        if xodim.user:
+            if new_username and new_username != xodim.user.username:
+                if User.objects.filter(username=new_username).exclude(id=xodim.user.id).exists():
+                    messages.error(request, "Ushbu username band!")
+                    return redirect('admin_dashboard')
+                xodim.user.username = new_username
+
+            if new_password:
+                xodim.user.set_password(new_password)
+
+            xodim.user.save()
+            messages.success(request, f"{xodim.ism} {xodim.familiya} login ma'lumotlari yangilandi!")
+        else:
+            # Yangi user yaratib bog'lash
+            if User.objects.filter(username=new_username).exists():
+                messages.error(request, "Ushbu username band!")
+                return redirect('admin_dashboard')
+
+            user = User.objects.create_user(
+                username=new_username,
+                password=new_password,
+                first_name=xodim.ism,
+                last_name=xodim.familiya
+            )
+            xodim.user = user
+            xodim.is_approved = True
+            xodim.save()
+            messages.success(request, f"{xodim.ism} {xodim.familiya} uchun yangi akkaunt yaratildi va bog'landi!")
+
+    return redirect('admin_dashboard')
+
 
 

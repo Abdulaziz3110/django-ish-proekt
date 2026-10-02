@@ -5,6 +5,15 @@
         <h2 class="fw-bold text-dark"><i class="fa-solid fa-chart-pie me-2 text-primary"></i> Boshqaruv Paneli (Admin)</h2>
     </div>
 
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 mb-4" role="alert">
+        <i class="fa-solid fa-circle-info me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
     <!-- Statistikalar -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
@@ -81,12 +90,13 @@
     </div>
 
     <!-- Tasdiqlashni kutayotgan xodimlar -->
+    {% if pending_xodimlar %}
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-start border-warning border-4">
                 <div class="card-header bg-warning bg-opacity-10 border-0 py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold text-dark">
-                        <i class="fa-solid fa-user-clock text-warning me-2"></i>Tasdiqlashni Kutayotgan Akkauntlar
+                        <i class="fa-solid fa-user-clock text-warning me-2"></i>Yangi Registratsiyalar (Tasdiqlashni kutayotganlar)
                         <span class="badge bg-warning text-dark rounded-pill ms-2">{{ pending_xodimlar|length }}</span>
                     </h5>
                 </div>
@@ -114,17 +124,140 @@
                                             <i class="fa-solid fa-check me-1"></i>Tasdiqlash
                                         </a>
                                         <a href="{% url 'disapprove_xodim' x.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-2">
-                                            <i class="fa-solid fa-xmark"></i>
+                                            <i class="fa-solid fa-xmark me-1"></i>Rad etish
                                         </a>
                                     </td>
                                 </tr>
-                                {% empty %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Barcha Xodimlar Akkauntlarini Boshqarish -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="fa-solid fa-user-gear text-primary me-2"></i>Barcha Xodim Akkauntlarini Boshqarish
+                    </h5>
+                    <a href="{% url 'xodimlar' %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                        <i class="fa-solid fa-plus me-1"></i>Yangi Xodim Qo'shish
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        <i class="fa-solid fa-circle-check text-success fa-2x mb-2 d-block opacity-75"></i>
-                                        Hozircha tasdiqlashni kutayotgan yangi akkauntlar yo'q.
+                                    <th class="ps-4">Xodim</th>
+                                    <th>Username (Login)</th>
+                                    <th>Bo'lim / Lavozim</th>
+                                    <th>Tasdiq Holati</th>
+                                    <th>Akkaunt Holati</th>
+                                    <th class="pe-4 text-end">Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for x in barcha_xodimlar %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">{{ x.ism }} {{ x.familiya }}</div>
+                                        <small class="text-muted"><i class="fa-solid fa-phone me-1"></i>{{ x.telefon|default:"Tel ko'rsatilmagan" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if x.user %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fs-6">
+                                            <i class="fa-solid fa-user me-1"></i>{{ x.user.username }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">Akkaunt yo'q</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span>{{ x.bolim|default:"-" }}</span>
+                                        {% if x.lavozim %}<small class="text-muted d-block">{{ x.lavozim }}</small>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if x.is_approved %}
+                                        <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Tasdiqlangan</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-clock me-1"></i>Kutmoqda</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if x.user %}
+                                            {% if x.user.is_active %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-lock-open me-1"></i>Faol</span>
+                                            {% else %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="fa-solid fa-lock me-1"></i>Bloklangan</span>
+                                            {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        {% if x.user %}
+                                            <!-- Faollashtirish / Bloklash -->
+                                            <a href="{% url 'toggle_xodim_status' x.id %}" class="btn {% if x.user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %} btn-sm rounded-pill px-3 me-1" title="Akkaunt holatini o'zgartirish">
+                                                {% if x.user.is_active %}
+                                                <i class="fa-solid fa-ban me-1"></i>Bloklash
+                                                {% else %}
+                                                <i class="fa-solid fa-check-circle me-1"></i>Faollashtirish
+                                                {% endif %}
+                                            </a>
+                                        {% endif %}
+
+                                        <!-- Login va Parol o'zgartirish / Akkaunt bog'lash Modal tugmasi -->
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 me-1" data-bs-toggle="modal" data-bs-target="#manageAccountModal{{ x.id }}">
+                                            <i class="fa-solid fa-key me-1"></i>{% if x.user %}Login/Parol{% else %}Akkaunt Bog'lash{% endif %}
+                                        </button>
+
+                                        {% if not x.is_approved %}
+                                        <a href="{% url 'approve_xodim' x.id %}" class="btn btn-success btn-sm rounded-pill px-2" title="Tasdiqlash">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
+
+                                <!-- Login/Parol Boshqaruv Modali -->
+                                <div class="modal fade" id="manageAccountModal{{ x.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header bg-primary text-white py-3">
+                                                <h5 class="modal-title fw-bold">
+                                                    <i class="fa-solid fa-user-gear me-2"></i>{{ x.ism }} {{ x.familiya }} - Login Ma'lumotlari
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form method="POST" action="{% url 'manage_xodim_account' x.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-body p-4">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Username (Login)</label>
+                                                        <input type="text" name="username" class="form-control rounded-3" value="{{ x.user.username|default:'' }}" placeholder="ali_valiyev" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">{% if x.user %}Yangi Parol (O'zgartirish shart bo'lmasa bo'sh qoldiring){% else %}Parol kiriting{% endif %}</label>
+                                                        <input type="password" name="password" class="form-control rounded-3" placeholder="••••••••" {% if not x.user %}required{% endif %}>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Yopish</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                                                        <i class="fa-solid fa-save me-1"></i>Saqlash
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -151,6 +284,9 @@
                         </a>
                         <a href="{% url 'ish_kunlari' %}" class="btn btn-outline-warning px-4 py-2 rounded-pill fw-semibold">
                             <i class="fa-solid fa-calendar-alt me-2"></i> Ish kunlarini boshqarish
+                        </a>
+                        <a href="{% url 'hisobot' %}" class="btn btn-outline-danger px-4 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-chart-line me-2"></i> Hisobotlarni ko'rish
                         </a>
                         <a href="/admin/" class="btn btn-outline-dark px-4 py-2 rounded-pill fw-semibold">
                             <i class="fa-solid fa-gear me-2"></i> Django Admin panel
