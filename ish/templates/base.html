@@ -171,7 +171,14 @@
                     </li>
                     {% if user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold" href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-gauge-high me-1"></i> Dashboard</a>
+                        <a class="nav-link text-warning fw-bold position-relative" href="{% url 'admin_dashboard' %}">
+                            <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
+                            {% if pending_xodimlar_count > 0 %}
+                            <span class="badge rounded-pill bg-danger ms-1 px-2 py-1 align-middle" style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-bell me-1"></i>{{ pending_xodimlar_count }}
+                            </span>
+                            {% endif %}
+                        </a>
                     </li>
                     {% endif %}
 
@@ -208,7 +215,24 @@
 
     <!-- Kontent -->
     <div class="main-content">
-        <div class="container mt-5">
+        <div class="container mt-4">
+            {% if user.is_superuser and pending_xodimlar_count > 0 %}
+            <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-20 p-2 rounded-circle me-3 text-warning">
+                        <i class="fa-solid fa-bell fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Bildirishnoma: Yangi Registratsiyalar!</h6>
+                        <span class="text-muted small"><strong>{{ pending_xodimlar_count }} ta</strong> yangi xodim ro'yxatdan o'tdi va sizning tasdiqlashingizni kutmoqda.</span>
+                    </div>
+                </div>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-warning btn-sm rounded-pill fw-bold px-4 py-2">
+                    <i class="fa-solid fa-user-check me-1"></i>Tasdiqlashga o'tish
+                </a>
+            </div>
+            {% endif %}
+
             {% block content %}{% endblock %}
         </div>
     </div>
